@@ -1,0 +1,857 @@
+openapi: 3.0.0
+info:
+  title: API Controlador de Carga MPPT mPower 30
+  description: |
+    API para monitoramento do Controlador de Carga MPPT mPower 30
+
+    # Configurações:
+    
+    - **Status**: Retorna os dados configurados no dispositivo.
+    - **Controle de Saida**: Envia comandos para o dispositivo para alterar os estados.
+    - **Interface de Rede**: Possibilidade de alterar os dados da interface de rede.
+    - **Configuração das Saídas**: Possibilidade de alterar o status e tempo de rearme.
+    - **Configurar Watchdog**: Permite a configuração personalizada dos parâmetros do watchdog.
+    - **Status do Watchdog**: Possibilidade de alterar o status do watchdog
+    - **SNMP**: Configuração dos parâmetros do SNMP.
+    - **Configuracões de Trigger para o Relé**: Possibilidade de alterar os estados do trigger para o relé
+    - **Configuração dos Parametros do Banco de Baterias**: Permite alterar os parâmetros do banco de baterias
+    
+  
+    <h1>Instruções para Solicitações que Contenham "/.../"</h1>
+    <p>Para requisições que incluam "/.../" na URL, siga o exemplo fornecido e copie apenas os valores que aparecem após "/../". Isso significa que o "/.../" não deve ser incluído na sua solicitação. Apenas os valores subsequentes são necessários para que a requisição seja bem-sucedida.</p> <p>Exemplo:</p> <ul> <li><strong>Requisição Original:</strong> <code>/../wdt.htm</code></li> <li><strong>Requisição Correta:</strong> <code>/wdt.htm</code></li> </ul>
+  
+  version: 1.0.0
+servers:
+  - url: http://{{host}}
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Autenticação básica necessária. 
+
+tags:
+  - name: Status
+  - name: Controle de Saida
+  - name: Interface de Rede
+  - name: Configuração das Saídas
+  - name: Configurar Watchdog
+  - name: Status do Watchdog
+  - name: SNMP
+  - name: Configuracões de Trigger para o Relé
+  - name: Configuração dos Parametros do Banco de Baterias
+  - name: Alterar senha
+  
+  
+  
+
+paths:
+  /status.json:
+    get:
+      tags:
+        - Status
+      summary:  Buscar informações do status do equipamento
+      description: |
+
+          **Exemplos**:
+        
+          - URL: `/status.json`
+          
+      responses:
+        '200':
+          description: Status obtido com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Json com as informações do equipamento"
+        '500':
+          description: Erro ao buscar status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erro interno do servidor."
+
+      security:
+        - basicAuth: []
+  /outpoe.cgi:
+    get:
+      tags:
+        - Controle de Saida
+      summary: Controle das saidas 
+      description: |
+          Comanados de controle das saídas:
+          
+           **Exemplos**:
+            - URL: `/outpoe.cgi?poe=1&sts=0`
+            - Para a saída , está sendo desligada. 
+      parameters:
+        - name: poe
+          in: query
+          required: true
+          description: |
+           Operação para escolher qual saída será alterada. 
+            - `1` para saída
+            - `6` para rele
+            
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "6"
+            example: "1"
+            
+        - name: sts
+          in: query
+          description: |
+            Operação para ativar ou desativar as  saídas:
+            
+              **Tipo de saída**:
+              - `0`: Desligado.
+              - `1`: Ligado.
+          required: true
+          schema:
+            type: string
+            enum:
+              - "0"
+              - "1"
+            example: "0"
+            
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "Success! Proteção habilitada"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+  /config.htm:
+    post:
+      tags:
+        - Interface de Rede
+      summary:  Alterar configurações de rede
+      description: |
+         
+         - Configura manualmente as informações de rede do equipamento.
+        
+          **Exemplos**:
+        
+          - URL: `/config.htm`
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                dhcp:
+                  type: boolean
+                  description: Define se o DHCP está ativado ou desativado
+                  example: false
+                mac:
+                  type: string
+                  description: Endereço MAC da interface de rede
+                  example: "C0:C0:C0:00:00:00"
+                host:
+                  type: string
+                  description: Nome do host [ Sem espaços e caracteres !@#$%&*(){}[]^~´`\/-_=+-]
+                  example: "POPENG"
+                h2pt:
+                  type: string
+                  description: Porta de rede
+                  example: "80"
+                ip:
+                  type: string
+                  description: Endereço IP da interface
+                  example: "192.168.1.10"
+                gw:
+                  type: string
+                  description: Gateway padrão
+                  example: "192.168.1.1"
+                sub:
+                  type: string
+                  description: Máscara de sub-rede
+                  example: "255.255.255.0"
+                dns1:
+                  type: string
+                  description: Servidor DNS 1
+                  example: "192.168.1.1"
+                dns2:
+                  type: string
+                  description: Servidor DNS 2
+                  example: "4.4.4.4"
+      responses:
+        '200':
+          description: Configurações de rede alteradas com sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Configurações alteradas com sucesso</body></html>"
+        '400':
+          description: Erro ao alterar configurações de rede
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Parâmetros inválidos"
+
+      security:
+        - basicAuth: []
+        
+  /output.htm:
+    get:
+      tags:
+        - Configuração das Saídas
+      summary: Configuração Rearme da Saída do Controlador MPPT
+      description: |
+         
+         - Gravar as informações de saída, para  `ativar o temporizador` e `tempo de rearme`. 
+        
+         **Exemplos**:
+        
+          - URL: `output.htm?tmr=false&tmp=10`
+          
+      parameters:
+        - name: tmr
+          in: query
+          description: Ativar Temporizador
+          required: true
+          schema:
+            type: boolean
+            example: false
+        - name: tmp
+          in: query
+          description: Tempo Rearme
+          required: true
+          schema:
+            type: string
+            example: "10"
+            
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /wdt.htm:
+    get:
+      tags:
+        - Configurar Watchdog
+      summary: Configuração do Watchdog
+      description: |
+        Endpoint para configurar o Watchdog, ativar, e ajustar os intervalos:
+            
+        - **Ativar Watchdog**
+        - **Intervalo entre Varreduras[Min]**
+        - **Limite Ping [1- 10000] ms**
+        - **Tempo Rearme da Porta [5-240] segundos**
+        - **Número Máximo de Reset [0 = Desabilitado - 255]**
+        - **Ativar Watchdog**
+        - **IP [IPV4]**
+        
+        **Exemplos**:
+        - URL: `/wdt.htm?op=0&w1=false&w2=1&w3=20&w4=10&w5=0`
+        
+     
+      parameters:
+        - name: w1
+          in: query
+          description: Ativar Watchdog
+          required: true
+          schema:
+            type: boolean
+            example: true
+        - name: w2
+          in: query
+          description: Intervalo entre Varreduras[Min]
+          required: true
+          schema:
+            type: string
+            example: "5"
+        - name: w11
+          in: query
+          description: Limite Ping [1- 10000] ms
+          required: true
+          schema:
+            type: string
+            example: "10"
+        - name: w12
+          in: query
+          description: Tempo Rearme da Porta [5-240] segundos
+          required: true
+          schema:
+            type: string
+            example: "0"
+            
+        - name: w13
+          in: query
+          description: Número Máximo de Reset [0 = Desabilitado - 255]
+          required: true
+          schema:
+            type: string
+            example: "0"
+            
+        - name: w3
+          in: query
+          description: Ativar Watchdog para um IP específico
+          required: true
+          schema:
+            type: boolean
+            example: true
+            
+        - name: w4
+          in: query
+          description: IP [IPV4]
+          required: true
+          schema:
+            type: string
+            example: "0.0.0.0"
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <body>
+                       Mostra os campos preenchidos do HTML
+                    </body>
+                  </html>
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /wdtsts:
+    get:
+      tags:
+        - Status do Watchdog
+      summary: Resetar o contador de reset 
+      description: |
+        
+        Acionar manualmente o reset do contador.
+        
+         **Exemplos**:
+        
+        - URL: `/outpoe.cgi?poe=4`
+      parameters:
+        - name: poe
+          in: query
+          description: Define a operação .
+          required: true
+          schema:
+            type: integer
+            enum: [4]
+            example: 4
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /snmp.htm:
+    get:
+      tags:
+        - SNMP
+      summary:  Configuração SNMP e Configuração das Communities
+      description: |
+         
+         - Configura manualmente a configuração do SNMP.
+        
+          **Exemplos**:
+        
+          - URL: `/snmp.htm?snmp1=false&rcm0=public&rcm1=read&rcm2=private&wcm0=private&wcm1=write&wcm2=public`
+      parameters:
+        - name: snmp1
+          in: query
+          description: Define se está ativado ou não o SNMP `1` para ativar e `0` para desligar.
+          required: true
+          schema:
+            type: integer
+            enum: [0,1]
+            example: 0
+        - name: rcm0
+          in: query
+          description: Read Community 1 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: public
+            
+        - name: rcm1
+          in: query
+          description: Read Community 2 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: read
+            
+        - name: rcm2
+          in: query
+          description: Read Community 3 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: private
+            
+        - name: wcm0
+          in: query
+          description: Write Community 1 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: private
+            
+        - name: wcm1
+          in: query
+          description: Write Community 2 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: write
+            
+        - name: wcm2
+          in: query
+          description: Write Community 3 - Somente são permitidos Números e Letras.
+          required: true
+          schema:
+            type: string
+            example: public
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+  
+        
+  /rele.htm:
+    get:
+      tags:
+        - Configuracões de Trigger para o Relé
+      summary: Configuracões de Trigger para o Relé
+      description: |
+         ## Configura manualmente o acionamento do rele.
+
+        
+         ### Desabilitado a Configuracão de Trigger para o Relé
+          **Exemplos**:
+          -  URL: `/rele.htm?trigger=0&`
+          
+         ### Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
+          **Exemplos**:
+          - URL: `/rele.htm?trigger=1&bat_minimo=216&bat_ok=240`
+          - Para o exemplo apresentado os vlores de devem ser apresentado x10  ou seja 216 é o mesmo que 21,6
+          
+          ### Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
+          
+          **Exemplos**:
+          - URL: `/rele.htm?trigger=2&ttemp=100&ttempm=10`
+          
+           ### Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
+          
+          **Exemplos**:
+          - URL: `/rele.htm?trigger=3`
+          
+          ### Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
+          
+          **Exemplos**:
+          - URL: `/rele.htm?trigger=4`
+
+      parameters:
+        - name: trigger
+          in: query
+          description: |
+              Define a operação.
+              - `0` - Desabilitado a Configuracão de Trigger para o Relé
+              - `1` - Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
+              - `2` - Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
+              - `3` - Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
+              - `4` - Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
+              
+          required: true
+          schema:
+            type: string
+            enum: 
+              - "0"
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+            example: "1"
+            
+        - name: bat_minimo
+          in: query
+          description: |
+              Acionar relé quando a tensão for menor que: [V]
+         
+          schema:
+            type: string
+            example: "216"
+            
+        - name: bat_ok
+          in: query
+          description: |
+              Desacionar relé quando tensão for maior que: [V]
+          
+          schema:
+            type: string
+            example: "240"
+            
+        - name: ttemp
+          in: query
+          description: |
+              Acionar relé quando a temperatura for maior que: [°C]
+          
+          schema:
+            type: string
+            example: "100"
+              
+        - name: ttempm
+          in: query
+          description: |
+              Desacionar relé quando a temperatura for menor que: [°C]
+          
+          schema:
+            type: string
+            example: "10"
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+  
+  
+  /bat.htm:
+    get:
+      tags:
+        - Configuração dos Parametros do Banco de Baterias
+      summary: Configuração dos Parametros do Banco de Baterias
+      description: |
+         ## Configura manualmente o acionamento das baterias.
+
+        
+         ### Sem configuração do Sensor de Temperatura Externo
+          **Exemplos**:
+          -  URL: `/bat.htm?batcarga=14.6&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=30&entempex=false&tempfix=false`
+          
+         ### Com configuração do Sensor de Temperatura Externo
+          **Exemplos**:
+          - URL: `bat.htm?batcarga=14.6&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=30&entempex=true&tiposensor=0&tempfix=false`
+
+      parameters:
+        - name: batcarga
+          in: query
+          description: |
+              Tensão de Carga (por Bateria 12V) [V] - 13V ~ 15V
+          required: true
+          schema:
+            type: string
+            example: "13"
+            
+        - name: batflut
+          in: query
+          description: |
+             Tensão de Flutuação (por Bateria 12V) [V] - 12,5V ~ 14V
+        
+          schema:
+            type: string
+            example: "12.5"
+            
+        - name: batsub
+          in: query
+          description: |
+             Desconexão por Sub Tensão (por Bateria 12V) [V] - 10,5V ~ 12V
+          
+          schema:
+            type: string
+            example: "10.5"
+            
+        - name: batreturn
+          in: query
+          description: |
+              Reconexão de Sub Tensão (por Bateria 12V) [V] - 11V ~ 13V
+          
+          schema:
+            type: string
+            example: "11"
+              
+        - name: batsobre
+          in: query
+          description: |
+              Desconexão por Sobre Tensão (por Bateria 12V) [V] - 14V ~ 16V
+          
+          schema:
+            type: string
+            example: "14"
+            
+        - name: tempocarga
+          in: query
+          description: |
+              Tempo de Carga [min] - 15Min ~ 180Min
+          
+          schema:
+            type: string
+            example: "15"
+            
+        - name: imaxcarga
+          in: query
+          description: |
+              Corrente Máxima de Carga [A] - 6A ~ 30A
+          schema:
+            type: string
+            example: "6"
+            
+        - name: entempex
+          in: query
+          description: |
+              Habilitar - configuração do Sensor de Temperatura Externo
+          schema:
+            type: boolean
+            example: true
+            
+        - name: tiposensor
+          in: query
+          description: |
+              Tipo de sensor: 
+              - `0` - Sensor de Temperatura Volt
+              - `1` - Sensor de Temperatura e Umidade Volt
+          schema:
+            type: string
+            example: "0"
+            
+        - name: tempfix
+          in: query
+          description: |
+              Ativar Correção por Temperatura
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []      
+  /senha.htm:
+    get:
+      tags:
+        - Alterar senha
+      summary:  Alterar a senha do equipamento
+      description: |
+         
+         - Configura manualmente a configuração do SNMP.
+        
+          **Exemplos**:
+        
+          - URL: `/senha.htm?senha=senha&csenha=senha`
+      parameters:
+        - name: senha
+          in: query
+          description: Nova senha
+          required: true
+          schema:
+            type: string
+            example: read
+            
+        - name: csenha
+          in: query
+          description: Confirme a nova senha
+          required: true
+          schema:
+            type: string
+            example: private
+            
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        

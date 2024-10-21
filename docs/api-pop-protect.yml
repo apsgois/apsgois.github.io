@@ -1,0 +1,952 @@
+openapi: 3.0.0
+info:
+  title: API Pop Protect SNMP 
+  description: |
+    API para monitoramento IoT.
+
+    ### Configurações:
+
+    - **Comandos**: Envia comandos para o dispositivo para alterar os estados e configurações dos parâmetros.
+    - **Configuração dos alarmes**: Permite a configuração personalizada dos parâmetros dos alarmes.
+    - **SNMP**: Configuração dos parâmetros do SNMP.
+    - **Configuração da interface de rede**: Possibilidade de alterar os dados da interface de rede.
+    - **Status**: Retorna os dados configurados no dispositivo.
+    
+    <h1>Instruções para Solicitações que Contenham "/.../"</h1>
+    <p>Para requisições que incluam "/.../" na URL, siga o exemplo fornecido e copie apenas os valores que aparecem após "/../". Isso significa que o "/.../" não deve ser incluído na sua solicitação. Apenas os valores subsequentes são necessários para que a requisição seja bem-sucedida.</p> <p>Exemplo:</p> <ul> <li><strong>Requisição Original:</strong> <code>/../alarme.htm</code></li> <li><strong>Requisição Correta:</strong> <code>/alarme.htm</code></li> </ul>
+  
+  version: 1.0.0
+servers:
+  - url: http://{{host}}
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Autenticação básica necessária. 
+
+tags:
+  - name: Status
+  - name: Comandos
+  - name: Configurar alarme 
+  - name: SNMP
+  - name: Alterar senha
+  - name: Interface de Rede
+  
+
+paths:
+  /status.json:
+    get:
+      tags:
+        - Status
+      summary:  Buscar informações do status do equipamento
+      description: |
+
+          **Exemplos**:
+        
+          - URL: `/status.json`
+          
+      responses:
+        '200':
+          description: Status obtido com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Json com as informações do equipamento"
+        '500':
+          description: Erro ao buscar status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erro interno do servidor."
+
+      security:
+        - basicAuth: []
+  /outpoe.cgi:
+    get:
+      tags:
+        - Comandos
+      summary: Controle dos comandos do sistema
+      description: "Comanados de controle do sistema"
+      parameters:
+        - name: poe
+          in: query
+          required: true
+          description: |
+            O valor do parâmetro `poe` determina qual comando será executado.
+            - `1`: Habilitar proteção do alarme.
+            - `z`: Zerar o contador.
+            - `2`: Controle Manual do rele.
+            - `3`: Controle Manual da sirene.
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "z"
+              - "2"
+              - "3"
+            example: "1"
+        - name: pr
+          in: query
+          description: |
+            O valor do parâmetro `pr` determina qual comando será executado.
+            - `0`: Controle Manual do rele. 
+            - `1`: Controle Manual do rele com reboot.
+      
+          schema:
+            type: string
+            enum:
+              - "0"
+              - "1"
+
+            example: "1"
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "Success! Proteção habilitada"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configuração do alarme
+      description: |
+        Endpoint para configurar o alarme, ativar, e ajustar tempos de disparo, rearme e relé:
+            
+        - **Ativar Alarme**
+        - **Tempo de Disparo [Máx 240s]**
+        - **Tempo de Rearme [Máx 240s]**
+        - **Tempo de Acionamento Relé [Máx 240s] [0 = Contínuo]**
+        
+        **Exemplos**:
+        - URL: `/alarme.htm?op=0&ativar=true&tdisp=5&trearm=10&trele=0`
+        
+     
+      parameters:
+        - name: op
+          in: query
+          description: Operação (op=0)
+          required: true
+          schema:
+            type: string
+            example: "0"
+        - name: ativar
+          in: query
+          description: Ativa o alarme
+          required: true
+          schema:
+            type: boolean
+            example: true
+        - name: tdisp
+          in: query
+          description: Tempo de disparo do alarme - Máx 240s
+          required: true
+          schema:
+            type: integer
+            example: 5
+        - name: trearm
+          in: query
+          description: Tempo de rearme do alarme - Máx 240s
+          required: true
+          schema:
+            type: integer
+            example: 10
+        - name: trele
+          in: query
+          description: Tempo de acionamento do relé - Máx 240s
+          required: true
+          schema:
+            type: integer
+            example: 0
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <body>
+                       Mostra os campos preenchidos do HTML
+                    </body>
+                  </html>
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /./alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configuração dos sensores
+      description: |
+        Endpoint para configurar os sensores no alarme, incluindo a ativação, tipo de sensor, nome, e status de trigger.
+        - **Sensor**
+        - **Tipo Sensor**   
+        - **Habilitar**   
+        - **Silencioso**   
+        - **Trigger**   
+        - **Nome Sensor**
+        
+        **Exemplos**:
+        
+        - URL: `/alarme.htm?op=1&silencioso=false&habilitar=true&trigger1=false&nome=Sensor+2&sensor=1&tipo=0`
+        
+      parameters:
+        - name: op
+          in: query
+          description: Operação (op=1)
+          required: true
+          schema:
+            type: string
+            example: "1"
+        - name: silencioso
+          in: query
+          description: Habilita ou desabilita o modo silencioso
+          required: true
+          schema:
+            type: boolean
+            example: false
+        - name: habilitar
+          in: query
+          description: Habilita ou desabilita o sensor
+          required: true
+          schema:
+            type: boolean
+            example: true
+        - name: trigger1
+          in: query
+          description: Status do trigger 1
+          required: true
+          schema:
+            type: boolean
+            example: false
+        - name: nome
+          in: query
+          description: Nome do sensor
+          required: true
+          schema:
+            type: string
+            example: "Sensor 2"
+        - name: sensor
+          in: query
+          description: Número do sensor
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: tipo
+          in: query
+          description: | 
+            Tipo do sensor 
+            - `0`: Magnético com fio. 
+            - `1`: Magnético sem fio.
+            - `2`: Infra-vermelho com fio. 
+            - `3`: Infra-vermelho sem fio.
+            - `4`: Antifurto bateria.
+          required: true
+          schema:
+            type: string
+            enum:
+              - "0"
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <body>
+                      Mostra os campos preenchidos do HTML
+                      Success! O sensor foi configurado corretamente.
+                    </body>
+                  </html>
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /../alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configuração de acionamento manual com temporização de retorno
+      description: |
+        
+        Configura manualmente o acionamento do alarme com um tempo de retorno, utilizando o parâmetro `trigger`.
+        
+         **Exemplos**:
+        
+        - URL: `/alarme.htm?op=2&trigger=5`
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação (2 para acionamento manual com temporização de retorno).
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define o tempo de retorno do acionamento manual. Mesmo valor cadastrado no "Tempo de Disparo"
+          required: true
+          schema:
+            type: integer
+            example: 5
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /.../alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configuração Sensores (Ativar Relé baseado no acionamento dos Sensores)
+      description: |
+         
+         - Configura manualmente o acionamento do alarme com  baseado no acionamento dos sensores, utilizando o parâmetro `trigger`.
+        
+         **Exemplos**:
+        
+          - URL: `/alarme.htm?op=2&trigger=1`
+          
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação.
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define que será a operação de ativar o relé baseado na temperatura
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /..../alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configuração Temperatura (Ativar Relé baseado na Temperatura)
+      description: |
+         - Configura manualmente o acionamento do alarme com a temperatura, utilizando o parâmetro `trigger`, `Maior valor de temperatura`, `Menor valor de temperatura`.
+
+         **Exemplos**:
+        
+          - URL: `/alarme.htm?op=2&trigger=0&ttemp=40&ttempm=21`
+          
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação.
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define que será a operação de ativar o relé baseado na temperatura
+          required: true
+          schema:
+            type: integer
+            example: 0
+        - name: ttemp
+          in: query
+          description: Acionar relé quando a temperatura for maior que [°C]. Este valor deve ser um número inteiro entre 0 e 100
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            example: 20
+         
+        - name: ttempm
+          in: query
+          description: Desacionar relé quando a temperatura for menor que [°C]. Este valor deve ser um número inteiro entre 0 e 100
+          required: true
+          schema:
+            type: integer
+            example: 0
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /...../alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configurção Tensão Bateria (Ativar Relé baseado na tensão da Bateria)
+      description: |
+         - Configura manualmente o acionamento do alarme com a temperatura, utilizando o parâmetro `trigger`, `Maior valor da bateria`, `Menor valor da bateria`.
+         
+         **Exemplos**:
+        
+          - URL: `/alarme.htm?op=2&trigger=2&tbat=20&tbatret=10`
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação.
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define que será a operação de ativar o relé baseado na temperatura
+          required: true
+          schema:
+            type: integer
+            example: 2
+        - name: tbat
+          in: query
+          description: Acionar relé quando a tensão for maior que [VDC] 
+          required: true
+          schema:
+            type: integer
+            example: 0
+        - name: tbatret
+          in: query
+          description: Desacionar o Relé quando a tensão for menor que [VDC] 
+          required: true
+          schema:
+            type: integer
+            example: 0
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /....../alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configurações do Modo Gerador -Tensão Bateria (Ativar Relé baseado na tensão da Bateria)
+      description: |
+         - Configura manualmente o acionamento do alarme com a temperatura, utilizando o parâmetro `trigger`, `Maior valor de tensão`, `Menor valor de tensão`.
+         
+         **Exemplos**:
+        
+          - URL: `/alarme.htm?op=2&trigger=3&gtbat=20&gtbatret=10`
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação.
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define que será a operação de ativar o relé baseado na temperatura
+          required: true
+          schema:
+            type: integer
+            example: 3
+        - name: gtbat
+          in: query
+          description: Desacionar relé quando a tensão for maior que [VDC] 
+          required: true
+          schema:
+            type: integer
+            example: 0
+        - name: gtbatret
+          in: query
+          description: Acionar o Relé quando a tensão for menor que [VDC] 
+          required: true
+          schema:
+            type: integer
+            example: 0
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /......./alarme.htm:
+    get:
+      tags:
+        - Configurar alarme
+      summary: Configurações do Modo Gerador- Rede Elétrica (Ativar Relé baseado na falta de energia elétrica)
+      description: |
+         - Configura manualmente o acionamento do modo gerador baseado na rede elétrica.
+        
+          **Exemplos**:
+        
+          - URL: `/alarme.htm?op=2&trigger=4`
+      parameters:
+        - name: op
+          in: query
+          description: Define a operação.
+          required: true
+          schema:
+            type: integer
+            enum: [2]
+            example: 2
+        - name: trigger
+          in: query
+          description: Define que será a operação de ativar o relé baseado na temperatura
+          required: true
+          schema:
+            type: integer
+            example: 4
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+  /snmp.htm:
+    get:
+      tags:
+        - SNMP
+      summary:  Configuração SNMP e Configuração das Communities
+      description: |
+         
+         - Configura manualmente a configuração do SNMP.
+        
+          **Exemplos**:
+        
+          - URL: `/snmp.htm?snmp1=false&rcm0=public&rcm1=read&rcm2=private&wcm0=private&wcm1=write&wcm2=public`
+      parameters:
+        - name: snmp1
+          in: query
+          description: Define se está ativado ou não o SNMP `1` para ativar e `0` para desligar.
+          required: true
+          schema:
+            type: integer
+            enum: [0,1]
+            example: 0
+        - name: rcm0
+          in: query
+          description: Read Community 1
+          required: true
+          schema:
+            type: string
+            example: public
+            
+        - name: rcm1
+          in: query
+          description: Read Community 2
+          required: true
+          schema:
+            type: string
+            example: read
+            
+        - name: rcm2
+          in: query
+          description: Read Community 3
+          required: true
+          schema:
+            type: string
+            example: private
+            
+        - name: wcm0
+          in: query
+          description: Write Community 1
+          required: true
+          schema:
+            type: string
+            example: private
+            
+        - name: wcm1
+          in: query
+          description: Write Community 2
+          required: true
+          schema:
+            type: string
+            example: write
+            
+        - name: wcm2
+          in: query
+          description: Write Community 3
+          required: true
+          schema:
+            type: string
+            example: public
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+  
+  /senha.htm:
+    get:
+      tags:
+        - Alterar senha
+      summary:  Alterar a senha do equipamento
+      description: |
+         
+         - Configura manualmente a configuração do SNMP.
+        
+          **Exemplos**:
+        
+          - URL: `/senha.htm?senha=senha&csenha=senha`
+      parameters:
+        - name: senha
+          in: query
+          description: Nova senha
+          required: true
+          schema:
+            type: string
+            example: read
+            
+        - name: csenha
+          in: query
+          description: Confirme a nova senha
+          required: true
+          schema:
+            type: string
+            example: private
+            
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /config.htm:
+    post:
+      tags:
+        - Interface de Rede
+      summary:  Alterar configurações de rede
+      description: |
+         
+         - Configura manualmente as informações de rede do equipamento.
+        
+          **Exemplos**:
+        
+          - URL: `/config.htm`
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                dhcp:
+                  type: boolean
+                  description: Define se o DHCP está ativado ou desativado
+                  example: false
+                mac:
+                  type: string
+                  description: Endereço MAC da interface de rede
+                  example: "C0:C0:C0:00:00:00"
+                host:
+                  type: string
+                  description: Nome do host
+                  example: "POPENG"
+                h2pt:
+                  type: string
+                  description: Porta de rede
+                  example: "80"
+                ip:
+                  type: string
+                  description: Endereço IP da interface
+                  example: "192.168.1.10"
+                gw:
+                  type: string
+                  description: Gateway padrão
+                  example: "192.168.1.1"
+                sub:
+                  type: string
+                  description: Máscara de sub-rede
+                  example: "255.255.255.0"
+                dns1:
+                  type: string
+                  description: Servidor DNS 1
+                  example: "192.168.1.1"
+                dns2:
+                  type: string
+                  description: Servidor DNS 2
+                  example: "4.4.4.4"
+      responses:
+        '200':
+          description: Configurações de rede alteradas com sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Configurações alteradas com sucesso</body></html>"
+        '400':
+          description: Erro ao alterar configurações de rede
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Parâmetros inválidos"
+
+      security:
+        - basicAuth: []

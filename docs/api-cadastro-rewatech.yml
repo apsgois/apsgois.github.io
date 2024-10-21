@@ -1,0 +1,339 @@
+openapi: 3.0.0
+info:
+  title: API de gerencimento de dispositivos Pop Protect - Rewatec
+  description: |
+    Esta API é responsável por monitorar e gerenciar os dispositivos Pop Protect cadastrados. 
+    Sempre que houver uma alteração nas configurações, a API envia comandos automaticamente para os dispositivos habilitados.
+
+    **Funcionalidades principais:**
+    
+    - **Cadastro de usuários**: Gerenciamento de contas e permissões de usuários.
+    - **Cadastro de equipamentos**: Registro e configuração de novos dispositivos Pop Protect.
+    - **Envio de comandos**: Envio de instruções para os dispositivos cadastrados, conforme as configurações definidas.
+    - **Alteração das informações do servidor**: Modificação de dados e configurações relacionadas ao servidor.
+    - **Execução de comandos em dispositivos**: Comandos de controle específicos para os dispositivos habilitados.
+    
+
+  version: 1.0.0
+servers:
+  - url: http://{{base_url}}
+tags:
+  - name: Alterar IP do servidor
+    description: |
+      Responsável por controle do servidor
+  - name: Usuário
+    description: >-
+      Responsável por controle de usuários, sendo possível:
+
+     
+      
+  - name: Comandos
+    description: |-
+      Responsável por controle dos comandos, sendo possível:
+
+      
+  - name: Controle de equipamentos
+    description: |-
+      Responsável por controle dos equipamentos, sendo possível:
+
+     
+paths:
+  /configip:
+    post:
+      tags:
+        - Alterar IP do servidor
+      summary: Alterar o IP do servidor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                ip: localhost
+                mascara: 255.255.255.0
+                gateway: 192.168.1.1
+                dns: 8.8.8.8
+      responses:
+        "200":
+          description: O IP será alterado em breve.
+          content:
+            application/json: {}
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json: {}
+            
+    get:
+      tags:
+        - Alterar IP do servidor
+      summary: Buscar IP salvo no banco de dados
+      responses:
+        "200":
+          description: Sucesso 
+          content:
+            application/json: {}
+  /find:
+    get:
+      tags:
+        - Usuário
+      summary: Buscar todos os usuários cadastrados
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json: {}
+  /login:
+    post:
+      tags:
+        - Usuário
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                login: Ana
+                password: "123456789"
+      
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /create:
+    post:
+      tags:
+        - Usuário
+      summary: Criar usuário
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Ana
+                email: teste@teste.com
+                password: "123456789"
+      
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /test/{id}:
+    get:
+      tags:
+        - Comandos
+      summary: Enviar comandos para todas os equipamentos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do dispositivo a ser atualizado
+          schema:
+            type: integer
+      description:  |-
+        Teste para enviar os comandos para os dispositivos que estão
+        habilitados. 
+
+          - `1` - Ligar 
+
+          - `0` - Desligar
+      
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /cmd/:
+    post:
+      tags:
+        - Comandos
+      summary: Mandar comando para dispositivo especificos
+      description: |-
+        Necessário informar:
+        
+        - **IP**
+        - **Tipo**
+        - **Habilitado**
+    
+        O tipo pode variar entre os seguintes valores:
+        
+        - `0`: Rele desativado e sirene desativado
+        - `1`: Rele ativado e sirene desativado
+        - `2`: Rele desativado e sirene ativado
+        - `3`: Rele ativado e sirene ativado
+    
+        > **Nota**: O comando só será realizado se o parâmetro `habilitar` estiver ativado.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                ip: 192.168.8.200
+                tipo: "3"
+                habilitar: true
+      
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /ips:
+    post:
+      tags:
+        - Controle de equipamentos
+      summary: Criar novo dispositivo
+      description: |-
+        Necessário informar os seguintes campos:
+    
+        - **IP**: Exemplo: `192.168.1.10`
+        - **Nome**: Exemplo: `POP 1`
+        - **Rele**: Define se o rele está ativado. Exemplo: `true`
+        - **Sirene**: Define se a sirene está ativada. Exemplo: `true`
+        - **Habilitar**: Define se o dispositivo está habilitado. Exemplo: `true`
+        - **Status**: Indica o status atual do dispositivo. Exemplo: `false`
+    
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ip:
+                  type: string
+                  format: ipv4
+                  example: 192.168.1.10
+                name:
+                  type: string
+                  example: "POP 1"
+                rele:
+                  type: boolean
+                  example: true
+                sirene:
+                  type: boolean
+                  example: true
+                habilitar:
+                  type: boolean
+                  example: true
+                status:
+                  type: boolean
+                  example: false
+    
+      responses:
+        "200":
+          description: Dispositivo criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Dispositivo criado com sucesso"
+        "400":
+          description: Requisição inválida
+
+    get:
+      tags:
+        - Controle de equipamentos
+      summary: Buscar todos os dispositivos cadastrados
+      
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /ips/{id}:
+    put:
+      tags:
+        - Controle de equipamentos
+      summary: Atualizar o dispositivo por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do dispositivo a ser atualizado
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "TESTE 1"
+                ip:
+                  type: string
+                  format: ipv4
+                  example: "192.168.10.100"
+                rele:
+                  type: boolean
+                  example: true
+                sirene:
+                  type: boolean
+                  example: false
+                habilitar:
+                  type: boolean
+                  example: false
+              required:
+                - name
+                - ip
+                - rele
+                - sirene
+                - habilitar
+      responses:
+        "200":
+          description: Atualização realizada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Dispositivo atualizado com sucesso"
+        "400":
+          description: Requisição inválida
+        "404":
+          description: Dispositivo não encontrado
+    
+    delete:
+      tags:
+        - Controle de equipamentos
+      summary: Deletar dispositivo por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do dispositivo a ser deletado
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dispositivo deletado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Dispositivo deletado com sucesso"
+        "404":
+          description: Dispositivo não encontrado
