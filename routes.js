@@ -23,7 +23,7 @@ const api_controlador_de_carga_mppt = yaml.load(
 );
 
 router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "page.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 router.use("/api-docs/pop-protect1", swaggerUi.serve);
