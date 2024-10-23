@@ -651,7 +651,8 @@ paths:
       summary:  Alterar a senha do equipamento
       description: |
          
-         - Configura manualmente a configuração do SNMP.
+         - Configura manualmente a configuração da senha.
+         **Observação**: A senha deve ser igual a senha de confirmação, caso as senhas não sejam iguais, a alteração será para a primeira senha.
         
           **Exemplos**:
         
