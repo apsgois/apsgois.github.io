@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: API Controlador de Carga MPPT mPower 30
+  title: API Controlador de Carga MPPT lPower 20 
   description: |
-    API para monitoramento do Controlador de Carga MPPT mPower 30
+    API para monitoramento do Controlador de Carga MPPT lPower 20 
 
     # Configurações:
     
@@ -13,7 +13,6 @@ info:
     - **Configurar Watchdog**: Permite a configuração personalizada dos parâmetros do watchdog.
     - **Status do Watchdog**: Possibilidade de alterar o status do watchdog
     - **SNMP**: Configuração dos parâmetros do SNMP.
-    - **Configuracões de Trigger para o Relé**: Possibilidade de alterar os estados do trigger para o relé
     - **Configuração dos Parametros do Banco de Baterias**: Permite alterar os parâmetros do banco de baterias
     
   
@@ -39,7 +38,6 @@ tags:
   - name: Configurar Watchdog
   - name: Status do Watchdog
   - name: SNMP
-  - name: Configuracões de Trigger para o Relé
   - name: Configuração dos Parametros do Banco de Baterias
   - name: Alterar senha
   
@@ -106,13 +104,11 @@ paths:
           description: |
            Operação para escolher qual saída será alterada. 
             - `1` para saída
-            - `6` para rele
-            
+          
           schema:
             type: string
             enum:
               - "1"
-              - "6"
             example: "1"
             
         - name: sts
@@ -246,7 +242,7 @@ paths:
         
          **Exemplos**:
         
-          - URL: `output.htm?tmr=false&tmp=10`
+          - URL: `output.htm?tmr=true&tmp=23`
           
       parameters:
         - name: tmr
@@ -545,127 +541,6 @@ paths:
       security:
         - basicAuth: []
   
-        
-  /rele.htm:
-    get:
-      tags:
-        - Configuracões de Trigger para o Relé
-      summary: Configuracões de Trigger para o Relé
-      description: |
-         ## Configura manualmente o acionamento do rele.
-
-        
-         ### Desabilitado a Configuracão de Trigger para o Relé
-          **Exemplos**:
-          -  URL: `/rele.htm?trigger=0&`
-          
-         ### Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=1&bat_minimo=216&bat_ok=240`
-          - Para o exemplo apresentado os vlores de devem ser apresentado x10  ou seja 216 é o mesmo que 21,6
-          
-          ### Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=2&ttemp=100&ttempm=10`
-          
-           ### Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=3`
-          
-          ### Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=4`
-
-      parameters:
-        - name: trigger
-          in: query
-          description: |
-              Define a operação.
-              - `0` - Desabilitado a Configuracão de Trigger para o Relé
-              - `1` - Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
-              - `2` - Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
-              - `3` - Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
-              - `4` - Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
-              
-          required: true
-          schema:
-            type: string
-            enum: 
-              - "0"
-              - "1"
-              - "2"
-              - "3"
-              - "4"
-            example: "1"
-            
-        - name: bat_minimo
-          in: query
-          description: |
-              Acionar relé quando a tensão for menor que: [V]
-         
-          schema:
-            type: string
-            example: "216"
-            
-        - name: bat_ok
-          in: query
-          description: |
-              Desacionar relé quando tensão for maior que: [V]
-          
-          schema:
-            type: string
-            example: "240"
-            
-        - name: ttemp
-          in: query
-          description: |
-              Acionar relé quando a temperatura for maior que: [°C]
-          
-          schema:
-            type: string
-            example: "100"
-              
-        - name: ttempm
-          in: query
-          description: |
-              Desacionar relé quando a temperatura for menor que: [°C]
-          
-          schema:
-            type: string
-            example: "10"
-        
-      responses:
-        '200':
-          description: Sucesso
-          content:
-            text/html:
-              schema:
-                type: string
-                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-                example: "*"
-            Connection:
-              schema:
-                type: string
-                example: "close"
-            Content-Type:
-              schema:
-                type: string
-                example: "text/html"
-            Cache-Control:
-              schema:
-                type: string
-                example: "no-cache"
-      security:
-        - basicAuth: []
-  
-  
   /bat.htm:
     get:
       tags:
@@ -677,12 +552,8 @@ paths:
         
          ### Sem configuração do Sensor de Temperatura Externo
           **Exemplos**:
-          -  URL: `/bat.htm?batcarga=14.6&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=30&entempex=false&tempfix=false`
+          -  URL: `bat.htm?batcarga=14.1&batflut=14&batsub=12&batreturn=13&batsobre=16&tempocarga=21&imaxcarga=20`
           
-         ### Com configuração do Sensor de Temperatura Externo
-          **Exemplos**:
-          - URL: `bat.htm?batcarga=14.6&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=30&entempex=true&tiposensor=0&tempfix=false`
-
       parameters:
         - name: batcarga
           in: query
@@ -741,36 +612,11 @@ paths:
         - name: imaxcarga
           in: query
           description: |
-              Corrente Máxima de Carga [A] - 6A ~ 30A
+              Corrente Máxima de Carga [A] - 3A ~ 20A
           schema:
             type: string
-            example: "6"
+            example: "3"
             
-        - name: entempex
-          in: query
-          description: |
-              Habilitar - configuração do Sensor de Temperatura Externo
-          schema:
-            type: boolean
-            example: true
-            
-        - name: tiposensor
-          in: query
-          description: |
-              Tipo de sensor: 
-              - `0` - Sensor de Temperatura Volt
-              - `1` - Sensor de Temperatura e Umidade Volt
-          schema:
-            type: string
-            example: "0"
-            
-        - name: tempfix
-          in: query
-          description: |
-              Ativar Correção por Temperatura
-          schema:
-            type: boolean
-            example: true
       responses:
         '200':
           description: Sucesso
@@ -854,4 +700,3 @@ paths:
                 example: "no-cache"
       security:
         - basicAuth: []
-        
