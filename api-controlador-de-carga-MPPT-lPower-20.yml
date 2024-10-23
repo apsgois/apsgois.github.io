@@ -652,7 +652,9 @@ paths:
       description: |
          
          - Configura manualmente a configuração da senha.
-         **Observação**: A senha deve ser igual a senha de confirmação, caso as senhas não sejam iguais, a alteração será para a primeira senha.
+         - 
+         **Observação**: 
+         As senhas devem ser iguais, caso não sejam, a alteração será para a primeira senha.
         
           **Exemplos**:
         
