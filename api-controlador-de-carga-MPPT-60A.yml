@@ -660,8 +660,15 @@ paths:
         
          ### Sem configuração do Sensor de Temperatura Externo
           **Exemplos**:
-          -  URL: `bat.htm?batcarga=14&batflut=12.5&batsub=10.5&batreturn=11&batsobre=16&tempocarga=15&imaxcarga=35&entempex=true&tiposensor=0&tempfix=false`
+          -  URL: `/bat.htm?batcarga=14.3&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=60&entempex=false&tempfix=false`
           
+          **Observação**:
+           - **batcarga(+0.5) tem que ser menor que batsobre**
+           - **batflut tem que ser menor ou igual a batcarga**
+           - **batsub tem que ser menor ou igual a batreturn**
+           - **batreturn tem que ser maior ou igual que batsub**
+           - **batsobre tem que ser maior que batcarga**
+           
       parameters:
         - name: batcarga
           in: query
@@ -670,7 +677,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "13"
+            example: "14.3"
             
         - name: batflut
           in: query
@@ -679,7 +686,7 @@ paths:
         
           schema:
             type: string
-            example: "12.5"
+            example: "13.7"
             
         - name: batsub
           in: query
@@ -697,7 +704,7 @@ paths:
           
           schema:
             type: string
-            example: "11"
+            example: "12.6"
               
         - name: batsobre
           in: query
@@ -706,7 +713,7 @@ paths:
           
           schema:
             type: string
-            example: "14"
+            example: "16"
             
         - name: tempocarga
           in: query
@@ -715,7 +722,7 @@ paths:
           
           schema:
             type: string
-            example: "15"
+            example: "60"
             
         - name: imaxcarga
           in: query
@@ -723,7 +730,7 @@ paths:
               Corrente Máxima de Carga [A] - 3A ~ 20A - Verificar o modelo do equipamento os valores de corrente podem variar.
           schema:
             type: string
-            example: "3"
+            example: "60"
 
         - name: entempex
           in: query
