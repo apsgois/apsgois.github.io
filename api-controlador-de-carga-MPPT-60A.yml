@@ -660,7 +660,7 @@ paths:
         
          ### Sem configuração do Sensor de Temperatura Externo
           **Exemplos**:
-          -  URL: `bat.htm?batcarga=14.1&batflut=14&batsub=12&batreturn=13&batsobre=16&tempocarga=21&imaxcarga=20`
+          -  URL: `bat.htm?batcarga=14&batflut=12.5&batsub=10.5&batreturn=11&batsobre=16&tempocarga=15&imaxcarga=35&entempex=true&tiposensor=0&tempfix=false`
           
       parameters:
         - name: batcarga
