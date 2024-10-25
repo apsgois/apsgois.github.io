@@ -460,12 +460,11 @@ paths:
       parameters:
         - name: snmp1
           in: query
-          description: Define se está ativado ou não o SNMP `1` para ativar e `0` para desligar.
+          description: Ativar SNMP
           required: true
           schema:
-            type: integer
-            enum: [0,1]
-            example: 0
+            type: boolean
+            example: true
         - name: rcm0
           in: query
           description: Read Community 1 - Somente são permitidos Números e Letras.
@@ -651,11 +650,14 @@ paths:
       summary:  Alterar a senha do equipamento
       description: |
          
-         - Configura manualmente a configuração do SNMP.
+         - Configura manualmente a senha do equipamentos.
         
           **Exemplos**:
         
           - URL: `/senha.htm?senha=senha&csenha=senha`
+          
+          **Observação**: 
+          - Caso a senha de confirmação seja enviada errado via URL, o valor da primeira senha será aceito. 
       parameters:
         - name: senha
           in: query

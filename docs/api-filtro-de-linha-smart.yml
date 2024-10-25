@@ -1,21 +1,19 @@
 openapi: 3.0.0
 info:
-  title: API Controlador de Carga MPPT lPower 20 
+  title: API Filtro de Linha Smart Web 
   description: |
-    API para monitoramento do Controlador de Carga MPPT lPower 20 
+    API para monitoramento do Filtro de Linha Smart Web 
 
-    # Configurações:
+    ### Configurações:
     
     - **Status**: Retorna os dados configurados no dispositivo.
-    - **Controle de Saida**: Envia comandos para o dispositivo para alterar os estados.
+    - **Controle de Saida**: Envia comandos para o dispositivo para alterar os estados e configurações dos parâmetros.
     - **Interface de Rede**: Possibilidade de alterar os dados da interface de rede.
-    - **Configuração das Saídas**: Possibilidade de alterar o status e tempo de rearme.
     - **Configurar Watchdog**: Permite a configuração personalizada dos parâmetros do watchdog.
-    - **Status do Watchdog**: Possibilidade de alterar o status do watchdog
+    - **Configuração das Saídas**: Possibilidade de alterar os estados das saídas
+    - **Rearme das Saídas**: Permite alterar o tempo de rearme das saídas
     - **SNMP**: Configuração dos parâmetros do SNMP.
-    - **Configuração dos Parametros do Banco de Baterias**: Permite alterar os parâmetros do banco de baterias
-    
-  
+   
     <h1>Instruções para Solicitações que Contenham "/.../"</h1>
     <p>Para requisições que incluam "/.../" na URL, siga o exemplo fornecido e copie apenas os valores que aparecem após "/../". Isso significa que o "/.../" não deve ser incluído na sua solicitação. Apenas os valores subsequentes são necessários para que a requisição seja bem-sucedida.</p> <p>Exemplo:</p> <ul> <li><strong>Requisição Original:</strong> <code>/../wdt.htm</code></li> <li><strong>Requisição Correta:</strong> <code>/wdt.htm</code></li> </ul>
   
@@ -33,12 +31,13 @@ components:
 tags:
   - name: Status
   - name: Controle de Saida
-  - name: Interface de Rede
-  - name: Configuração das Saídas
+  - name: Interface de Rede 
+  - name: Configurar data e hora
+  - name: Configuração do Timer 
   - name: Configurar Watchdog
-  - name: Status do Watchdog
+  - name: Configuração das Tomadas
+  - name: Rearme das Saídas
   - name: SNMP
-  - name: Configuração dos Parametros do Banco de Baterias
   - name: Alterar senha
   
   
@@ -90,25 +89,32 @@ paths:
     get:
       tags:
         - Controle de Saida
-      summary: Controle das saidas 
+      summary: Controle das Tomadas
       description: |
-          Comanados de controle das saídas:
+          Comanados de controle das Tomadas:
           
            **Exemplos**:
-            - URL: `/outpoe.cgi?poe=1&sts=0`
-            - Para a saída , está sendo desligada. 
+            - URL: `/outpoe.cgi?poe=1&sts=0&pr=0`"
+            - Para a saída 1, está sendo desligada e sem reinicio. 
       parameters:
         - name: poe
           in: query
           required: true
           description: |
            Operação para escolher qual saída será alterada. 
-            - `1` para saída
-          
           schema:
             type: string
             enum:
               - "1"
+              - "2"
+              - "3"
+              - "4"
+              - "5"
+              - "6"
+              - "7"
+              - "8"
+              - "9"
+              - "10"
             example: "1"
             
         - name: sts
@@ -127,6 +133,19 @@ paths:
               - "1"
             example: "0"
             
+        - name: pr
+          in: query
+          description: |
+            O valor do parâmetro `pr` determina se será com reinico ou sem.
+            - `0`: Sem reinicio. 
+            - `1`: Com reinicio.
+          required: true
+          schema:
+            type: string
+            enum:
+              - "0"
+              - "1"
+            example: "1"
       responses:
         '200':
           description: Sucesso
@@ -154,6 +173,7 @@ paths:
                 example: "no-cache"
       security:
         - basicAuth: []
+        
   /config.htm:
     post:
       tags:
@@ -231,35 +251,59 @@ paths:
       security:
         - basicAuth: []
         
-  /output.htm:
+  /relogio.htm:
     get:
       tags:
-        - Configuração das Saídas
-      summary: Configuração Rearme da Saída do Controlador MPPT
+        - Configurar data e hora
+      summary: Configuração do Relógio
       description: |
-         
-         - Gravar as informações de saída, para  `ativar o temporizador` e `tempo de rearme`. 
-        
-         **Exemplos**:
-        
-          - URL: `output.htm?tmr=true&tmp=23`
+          Comanados de controle das Tomadas:
           
+           **Exemplos**:
+            - URL: `/relogio.htm?rdata=24102024&rhora=165454&rdia=4`
       parameters:
-        - name: tmr
+        - name: rdata
           in: query
-          description: Ativar Temporizador
           required: true
+          description: |
+           Operação para passar o valor da data
           schema:
-            type: boolean
-            example: false
-        - name: tmp
+            type: string
+            example: "24102024"
+            
+        - name: rhora
           in: query
-          description: Tempo Rearme
+          description: |
+            Operação para passar o valor da data
           required: true
           schema:
             type: string
-            example: "10"
+            example: "165454"
             
+        - name: rdia
+          in: query
+          description: |
+           Operação para passar o valor do dia: 
+           **Exemplo**:
+           - `1` - Segunda 
+           - `2` - Terça 
+           - `3` - Quarta 
+           - `4` - Quinta 
+           - `5` - Sexta
+           - `6` - Sabado 
+           - `7` - Domingo
+          required: true
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+              - "5"
+              - "6"
+              - "7"
+            example: "1"
       responses:
         '200':
           description: Sucesso
@@ -267,7 +311,7 @@ paths:
             text/html:
               schema:
                 type: string
-                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+                example: "Success! Data definida"
           headers:
             Access-Control-Allow-Origin:
               schema:
@@ -287,7 +331,112 @@ paths:
                 example: "no-cache"
       security:
         - basicAuth: []
+  /timer.htm:
+    get:
+      tags:
+        - Configuração do Timer 
+      summary: Configuração do Timer 
+      description: |
+          Comanados de controle das Tomadas:
+          
+           **Exemplos**:
+            - URL: `/timer.htm?porta=1&ton=true&pon=0700&poff=2200&pag=1111100`
+      parameters:
+        - name: porta
+          in: query
+          required: true
+          description: |
+           Operação para passar o valor da tomada
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+              - "5"
+              - "6"
+              - "7"
+              - "8"
+              - "9"
+              - "10"
+            example: "1"
+
+        - name: ton
+          in: query
+          description: |
+            Operação para habilitar/desabilitar o timer da tomada
+          required: true
+          schema:
+            type: boolean
+            example: true
+            
+        - name: pon
+          in: query
+          description: |
+           Operação para passar qual o horário será ligado o timer.
+           
+           **Exemplo**:
+           - No exemplo apresentado será as 07h00
+          required: true
+          schema:
+            type: string
+            example: "0700"
         
+        - name: poff
+          in: query
+          description: |
+           Operação para passar qual o horário será desligado o timer.
+           
+           **Exemplo**:
+           - No exemplo apresentado será as 22h00
+          required: true
+          schema:
+            type: string
+            example: "2200"
+            
+        - name: pag
+          in: query
+          description: |
+           Sequência de 7 dígitos binários que representam os dias da semana, começando pela segunda-feira (1ª posição) até o domingo (7ª posição).
+              - "1" significa que o dia está habilitado.
+              - "0" significa que o dia está desabilitado.
+            
+          required: true
+          schema:
+            type: string
+            pattern: "^[01]{7}$"
+            minLength: 7
+            maxLength: 7
+            example: "1111100"
+            
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "Success! Data definida"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
   /wdt.htm:
     get:
       tags:
@@ -299,16 +448,21 @@ paths:
         - **Ativar Watchdog**
         - **Intervalo entre Varreduras[Min]**
         - **Limite Ping [1- 10000] ms**
-        - **Tempo Rearme da Porta [5-240] segundos**
-        - **Número Máximo de Reset [0 = Desabilitado - 255]**
-        - **Ativar Watchdog**
-        - **IP [IPV4]**
+        - **Tempo Rearme das Portas [5-60] segundos**
+        - **Número Máximo de Resets por Porta [0 = Desabilitado - 255]**
         
         **Exemplos**:
-        - URL: `/wdt.htm?op=0&w1=false&w2=1&w3=20&w4=10&w5=0`
+        - URL: `wdt.htm?op=0&w1=true&w2=1&w3=10&w4=5&w5=0`
         
-     
       parameters:
+        - name: op
+          in: query
+          description: Operação (op=0)
+          required: true
+          schema:
+            type: integer
+            enum: [0]
+            example: 0
         - name: w1
           in: query
           description: Ativar Watchdog
@@ -321,46 +475,30 @@ paths:
           description: Intervalo entre Varreduras[Min]
           required: true
           schema:
-            type: string
-            example: "5"
-        - name: w11
+            type: integer
+            example: 5
+        - name: w3
           in: query
           description: Limite Ping [1- 10000] ms
           required: true
           schema:
-            type: string
-            example: "10"
-        - name: w12
-          in: query
-          description: Tempo Rearme da Porta [5-240] segundos
-          required: true
-          schema:
-            type: string
-            example: "0"
-            
-        - name: w13
-          in: query
-          description: Número Máximo de Reset [0 = Desabilitado - 255]
-          required: true
-          schema:
-            type: string
-            example: "0"
-            
-        - name: w3
-          in: query
-          description: Ativar Watchdog para um IP específico
-          required: true
-          schema:
-            type: boolean
-            example: true
-            
+            type: integer
+            example: 10
         - name: w4
           in: query
-          description: IP [IPV4]
+          description: Tempo Rearme das Portas [5-60] segundos
           required: true
           schema:
-            type: string
-            example: "0.0.0.0"
+            type: integer
+            example: 0
+            
+        - name: w5
+          in: query
+          description: Número Máximo de Resets por Porta [0 = Desabilitado - 255]
+          required: true
+          schema:
+            type: integer
+            example: 0
         
       responses:
         '200':
@@ -395,10 +533,101 @@ paths:
       security:
         - basicAuth: []
         
+  /./wdt.htm:
+    get:
+      tags:
+        - Configurar Watchdog
+      summary: Configuração Watchdog das Saídas
+      description: |
+        Endpoint para configurar os Watchdog:
+        - **Saída**
+        - **Habilitar**   
+        - **IP [IPV4]**   
+       
+        
+        **Exemplos**:
+        
+        - URL: `wdt.htm?op=1&porta=1&wdten=true&wdtip=192.168.8.10`
+        
+      parameters:
+        - name: op
+          in: query
+          description: Operação (op=1)
+          required: true
+          schema:
+            type: integer
+            enum: [1]
+            example: 1
+        - name: porta
+          in: query
+          description: Habilita ou desabilita a saída
+          required: true
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+              - "5"
+              - "6"
+              - "7"
+              - "8"
+              - "9"
+              - "10"
+            example: "1"
+        - name: wdten
+          in: query
+          description: Habilita ou desabilita a saída
+          required: true
+          schema:
+            type: boolean
+            example: true
+        - name: wdtip
+          in: query
+          description: Status do trigger 1
+          required: true
+          schema:
+            type: string
+            example: "192.168.1.10"
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <body>
+                      Mostra os campos preenchidos do HTML
+                    </body>
+                  </html>
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
   /wdtsts:
     get:
       tags:
-        - Status do Watchdog
+        - Configurar Watchdog
       summary: Resetar o contador de reset 
       description: |
         
@@ -406,7 +635,7 @@ paths:
         
          **Exemplos**:
         
-        - URL: `/outpoe.cgi?poe=4`
+        - URL: `/outpoe.cgi?poe=11`
       parameters:
         - name: poe
           in: query
@@ -414,8 +643,8 @@ paths:
           required: true
           schema:
             type: integer
-            enum: [4]
-            example: 4
+            enum: [11]
+            example: 11
         
       responses:
         '200':
@@ -445,6 +674,185 @@ paths:
       security:
         - basicAuth: []
         
+  /output.htm:
+    get:
+      tags:
+        - Configuração das Tomadas
+      summary: Gravas as informações das tomadas
+      description: |
+         
+         - Gravar as informações de saída, com base na `saída`, `habilitar` e `identificação`. 
+        
+         **Exemplos**:
+        
+          - URL: `/output.htm?porta=1&rmac=true&nt=POE+1`
+          
+      parameters:
+        - name: porta
+          in: query
+          description: Define a saída.
+          required: true
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+              - "5"
+              - "6"
+              - "7"
+              - "8"
+              - "9"
+              - "10"
+            example: "1"
+        - name: rmac
+          in: query
+          description: Habilita ou desabilita a saída
+          required: true
+          schema:
+            type: boolean
+            example: true
+            
+        - name: nt
+          in: query
+          description: Identificação da saída. Não Utilizar caracteres como ["ç!@#$%&*(){}[]^~´`\/-_=+-,"]
+          required: true
+          schema:
+            type: string
+            example: "POE 1"
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /./output.htm:
+    get:
+      tags:
+        - Configuração das Tomadas
+      summary: Configuração das Saídas - Habilitar/Desabilitar todas
+      description: |
+         - Configura manualmente o acionamento do alarme com a temperatura, utilizando o parâmetro `trigger`, `Maior valor de temperatura`, `Menor valor de temperatura`.
+
+         **Exemplos**:
+        
+          - URL para habilitar: `/outpoe.cgi?poe=12`
+          - URL para desabilitar: `/outpoe.cgi?poe=13`
+          
+      parameters:
+        - name: poe
+          in: query
+          description: |
+              Define a operação de habilitar/desabilitar todas.
+              - `12` - Habilitar todas
+              - `13` - Desabilitar todas
+          required: true
+          schema:
+            type: string
+            enum: 
+              - "12"
+              - "13"
+            example: "12"
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
+        
+  /rearme.htm:
+    get:
+      tags:
+        - Rearme das Saídas
+      summary: Configuração Rearme das Saídas
+      description: |
+         - Configura manualmente o tempo de rearme das saídas.
+         
+         **Exemplos**:
+        
+          - URL: `/rearme.htm?tmp=10`
+          
+      parameters:
+        - name: tmp
+          in: query
+          description: Tempo rearme [5-120s]
+          required: true
+          schema:
+            type: string
+            example: "10"
+        
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: "close"
+            Content-Type:
+              schema:
+                type: string
+                example: "text/html"
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+      security:
+        - basicAuth: []
   /snmp.htm:
     get:
       tags:
@@ -539,110 +947,7 @@ paths:
                 example: "no-cache"
       security:
         - basicAuth: []
-  
-  /bat.htm:
-    get:
-      tags:
-        - Configuração dos Parametros do Banco de Baterias
-      summary: Configuração dos Parametros do Banco de Baterias
-      description: |
-         ## Configura manualmente o acionamento das baterias.
-
         
-         ### Sem configuração do Sensor de Temperatura Externo
-          **Exemplos**:
-          -  URL: `bat.htm?batcarga=14.1&batflut=14&batsub=12&batreturn=13&batsobre=16&tempocarga=21&imaxcarga=20`
-          
-      parameters:
-        - name: batcarga
-          in: query
-          description: |
-              Tensão de Carga (por Bateria 12V) [V] - 13V ~ 15V
-          required: true
-          schema:
-            type: string
-            example: "13"
-            
-        - name: batflut
-          in: query
-          description: |
-             Tensão de Flutuação (por Bateria 12V) [V] - 12,5V ~ 14V
-        
-          schema:
-            type: string
-            example: "12.5"
-            
-        - name: batsub
-          in: query
-          description: |
-             Desconexão por Sub Tensão (por Bateria 12V) [V] - 10,5V ~ 12V
-          
-          schema:
-            type: string
-            example: "10.5"
-            
-        - name: batreturn
-          in: query
-          description: |
-              Reconexão de Sub Tensão (por Bateria 12V) [V] - 11V ~ 13V
-          
-          schema:
-            type: string
-            example: "11"
-              
-        - name: batsobre
-          in: query
-          description: |
-              Desconexão por Sobre Tensão (por Bateria 12V) [V] - 14V ~ 16V
-          
-          schema:
-            type: string
-            example: "14"
-            
-        - name: tempocarga
-          in: query
-          description: |
-              Tempo de Carga [min] - 15Min ~ 180Min
-          
-          schema:
-            type: string
-            example: "15"
-            
-        - name: imaxcarga
-          in: query
-          description: |
-              Corrente Máxima de Carga [A] - 3A ~ 20A
-          schema:
-            type: string
-            example: "3"
-            
-      responses:
-        '200':
-          description: Sucesso
-          content:
-            text/html:
-              schema:
-                type: string
-                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-                example: "*"
-            Connection:
-              schema:
-                type: string
-                example: "close"
-            Content-Type:
-              schema:
-                type: string
-                example: "text/html"
-            Cache-Control:
-              schema:
-                type: string
-                example: "no-cache"
-      security:
-        - basicAuth: []      
   /senha.htm:
     get:
       tags:

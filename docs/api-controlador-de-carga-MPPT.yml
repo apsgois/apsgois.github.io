@@ -614,7 +614,6 @@ paths:
           in: query
           description: |
               Desacionar relé quando tensão for maior que: [V]
-          
           schema:
             type: string
             example: "240"
@@ -622,8 +621,7 @@ paths:
         - name: ttemp
           in: query
           description: |
-              Acionar relé quando a temperatura for maior que: [°C]
-          
+              Acionar relé quando a temperatura for maior que: [°C] - Máximo 120°C
           schema:
             type: string
             example: "100"
@@ -631,8 +629,7 @@ paths:
         - name: ttempm
           in: query
           description: |
-              Desacionar relé quando a temperatura for menor que: [°C]
-          
+              Desacionar relé quando a temperatura for menor que: [°C] - Minimo 0°C
           schema:
             type: string
             example: "10"
