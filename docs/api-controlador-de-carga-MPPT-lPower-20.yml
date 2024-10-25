@@ -402,20 +402,12 @@ paths:
       summary: Resetar o contador de reset 
       description: |
         
-        Acionar manualmente o reset do contador.
+        Acionar manualmente o reset do contador, usar a URL do exemplo para fazer o comando
         
          **Exemplos**:
         
         - URL: `/outpoe.cgi?poe=4`
-      parameters:
-        - name: poe
-          in: query
-          description: Define a operação .
-          required: true
-          schema:
-            type: integer
-            enum: [4]
-            example: 4
+      
         
       responses:
         '200':
