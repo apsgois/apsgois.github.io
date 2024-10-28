@@ -1,24 +1,24 @@
 openapi: 3.0.0
 info:
-  title: API Controlador de Carga MPPT 60A 
+  title: API UPS DC SMART 620W
   description: |
-    API para monitoramento do Controlador de Carga MPPT lPower 20 
+    API para monitoramento do UPS DC SMART 620W 
 
     # Configurações:
     
     - **Status**: Retorna os dados configurados no dispositivo.
-    - **Controle de Saida**: Envia comandos para o dispositivo para alterar os estados.
+    - **Status do dispositivo**: Envia comandos para o dispositivo para alterar os estados.
     - **Interface de Rede**: Possibilidade de alterar os dados da interface de rede.
-    - **Rele de carga**: Possibilidade de alterar o status e tempo de rearme.
-    - **Rele multifunção**: Possibilidade de alterar os estados do trigger para o relé
+    - **Configurações**: Possibilidade de alterar as configurações do rearme das saida, sensor de porta e configurações de trigger para o relé.
     - **Configurar Watchdog**: Permite a configuração personalizada dos parâmetros do watchdog.
     - **Status do Watchdog**: Possibilidade de alterar o status do watchdog
+    - **Teste da bateria**: Configurações do teste de bateria.
     - **SNMP**: Configuração dos parâmetros do SNMP.
-    - **Configuração dos Parametros do Banco de Baterias**: Permite alterar os parâmetros do banco de baterias
     
-    <h1>Instruções para Solicitações que Contenham "/.../"</h1>
-    <p>Para requisições que incluam "/.../" na URL, siga o exemplo fornecido e copie apenas os valores que aparecem após "/../". Isso significa que o "/.../" não deve ser incluído na sua solicitação. Apenas os valores subsequentes são necessários para que a requisição seja bem-sucedida.</p> <p>Exemplo:</p> <ul> <li><strong>Requisição Original:</strong> <code>/../wdt.htm</code></li> <li><strong>Requisição Correta:</strong> <code>/wdt.htm</code></li> </ul>
-  
+    ## Observações: 
+     Usar as URL de exemplos para montar as URL dos comandos. 
+    
+
   version: 1.0.0
 servers:
   - url: http://{{host}}
@@ -32,14 +32,13 @@ components:
 
 tags:
   - name: Status
-  - name: Controle de Saida
+  - name: Status do dispositivo
   - name: Interface de Rede
-  - name: Rele de carga
-  - name: Rele multifunção
+  - name: Configurações
   - name: Configurar Watchdog
   - name: Status do Watchdog
+  - name: Teste da bateria
   - name: SNMP
-  - name: Configuração dos Parametros do Banco de Baterias
   - name: Alterar senha
   
   
@@ -90,28 +89,31 @@ paths:
   /outpoe.cgi:
     get:
       tags:
-        - Controle de Saida
+        - Status do dispositivo
       summary: Controle das saidas 
       description: |
           Comanados de controle das saídas:
           
            **Exemplos**:
-            - URL do rele de carga: `/outpoe.cgi?poe=1&sts=0` -> saída está sendo desligada
-            - URL do rele de multifunção: `/outpoe.cgi?poe=6&sts=1` -> sapida esta sendo ligada
+            - URL para zerar o contador: `/outpoe.cgi?poe=6`
+            - URL do controle de carga: `/outpoe.cgi?poe=1&sts=0` -> saída está sendo desligada
+            - URL do controle de relé: `/outpoe.cgi?poe=5&sts=1` -> sapida esta sendo ligada
       parameters:
         - name: poe
           in: query
           required: true
           description: |
            Operação para escolher qual saída será alterada. 
-            - `1` rele de carga
-            - `6` rele multifunção
+            - `1` saída de carga
+            - `6` zerar contador 
+            - `5` controle de relé
           
           schema:
             type: string
             enum:
               - "1"
               - "6"
+              - "5"
             example: "1"
             
         - name: sts
@@ -234,10 +236,10 @@ paths:
       security:
         - basicAuth: []
         
-  /output.htm:
+  /alarme.htm:
     get:
       tags:
-        - Rele de carga
+        - Configurações
       summary: Configuração Rearme da Saída do Controlador MPPT
       description: |
          
@@ -245,139 +247,97 @@ paths:
         
          **Exemplos**:
         
-          - URL: `output.htm?tmr=true&tmp=23`
-          
+          - URL de configuração rearme da saída: `alarme.htm?op=0&tmr=true&tmp=12`
+          - URL de configurar sensor de porta: `/alarme.htm?op=1&ensensor=true`
+          - URL de configuracões de Trigger para o Relé - acionamento manual: `/alarme.htm?op=2&trigger=0&bat_minimo=248&bat_ok=280`
+          - URL Tensão Bateria : `/alarme.htm?op=2&trigger=0&bat_minimo=248&bat_ok=280`
+          - URL para Sensor de Porta : `/alarme.htm?op=2&bat_minimo=248&bat_ok=280&trigger=2&sensortempo=0`
+          - URL para Rede Elétrica: `/alarme.htm?op=2&bat_minimo=248&bat_ok=280&trigger=3`
+          - URL para Modo Start Gerador: `/alarme.htm?op=2&bat_minimo=248&bat_ok=280&trigger=4&geradortempo=64`
+
       parameters:
-        - name: tmr
+        - name: op
           in: query
-          description: Ativar Temporizador
+          description: |
+            Definir a operação:
+            
+            **Tipo de saída**:
+              - `0`: Configuração do rearme da saída.
+              - `1`: Configuração do sensor da porta.
+              - `2`: Configuracões de Trigger para o Relé
           required: true
           schema:
+            type: string
+            enum:
+              - "0"
+              - "1"
+              - "5"
+            example: "0"
+        - name: tmr
+          in: query
+          description: Ativar o temporizador
+          schema:
             type: boolean
-            example: false
+            example: true
         - name: tmp
           in: query
-          description: Tempo Rearme - O valo minimo é de 10
-          required: true
+          description: Tempo Rearme (segundos)
           schema:
             type: string
             example: "10"
             
-      responses:
-        '200':
-          description: Sucesso
-          content:
-            text/html:
-              schema:
-                type: string
-                example: "<html><body>Mostra os campos preenchidos do HTML</body></html>"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-                example: "*"
-            Connection:
-              schema:
-                type: string
-                example: "close"
-            Content-Type:
-              schema:
-                type: string
-                example: "text/html"
-            Cache-Control:
-              schema:
-                type: string
-                example: "no-cache"
-      security:
-        - basicAuth: []
-  /rele.htm:
-    get:
-      tags:
-        - Rele multifunção
-      summary: Configuracões de Trigger para o Relé
-      description: |
-         ## Configura manualmente o acionamento do rele.
-
+        - name: ensensor
+          in: query
+          description: habilitar Sensor
+          schema:
+            type: boolean
+            example: true
         
-         ### Desabilitado a Configuracão de Trigger para o Relé
-          **Exemplos**:
-          -  URL: `/rele.htm?trigger=0&`
-          
-         ### Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=1&bat_minimo=216&bat_ok=240`
-          - Para o exemplo apresentado os vlores de devem ser apresentado x10  ou seja 216 é o mesmo que 21,6
-          
-          ### Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=2&ttemp=100&ttempm=10`
-          
-           ### Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=3`
-          
-          ### Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
-          
-          **Exemplos**:
-          - URL: `/rele.htm?trigger=4`
-
-      parameters:
         - name: trigger
           in: query
-          description: |
-              Define a operação.
-              - `0` - Desabilitado a Configuracão de Trigger para o Relé
-              - `1` - Tensão Bateria (Ativar Relé baseado na Tensão da Bateria)
-              - `2` - Temperatura Externa(Ativar Relé baseado na Temperatura das Baterias)
-              - `3` - Temperatura Interna (Ativar Relé baseado na Temperatura interna do controlador)
-              - `4` - Operando em Bateria (Ativar Relé baseado na falta do Painel Solar)
-              
-          required: true
+          description: | 
+            Configuração de trigger para relé: 
+             - `0`- Acionamento Manual
+             - `1`- Tensão Bateria (Ativar relé baseado na tensão da bateria)
+             - `2`- Sensor de Porta (Ativar relé quando abrir a porta)
+              - `3`- Rede Elétrica (Ativar relé baseado na falta de energia elétrica)
+              - `4`- Modo Start Gerador (Ativar relé pelo tempo configurado na falta da energia elétrica)
           schema:
             type: string
-            enum: 
+            enum:
               - "0"
               - "1"
-              - "2"
               - "3"
               - "4"
-            example: "1"
+            example: "0"
             
         - name: bat_minimo
           in: query
-          description: |
-              Acionar relé quando a tensão for menor que: [V] 
-
+          description: Acionar relé quando a tensão for menor que [V]
           schema:
             type: string
-            example: "216"
-            
+            example: "248"
+        
         - name: bat_ok
           in: query
-          description: |
-              Desacionar relé quando tensão for maior que: [V]
+          description: Desacionar relé quando tensão for maior que [V]
           schema:
             type: string
-            example: "240"
+            example: "280"
             
-        - name: ttemp
+        - name: sensortempo
           in: query
-          description: |
-              Acionar relé quando a temperatura for maior que: [°C] - Máximo 120°C
+          description: Tempo de Acionamento [Máx 240s] [0 = Contínuo]
           schema:
             type: string
-            example: "100"
-              
-        - name: ttempm
+            example: "0"
+        - name: geradortempo
           in: query
-          description: |
-              Desacionar relé quando a temperatura for menor que: [°C] - Minimo 0°C
+          description: Tempo de Acionamento [Máx 240s] [0 = Contínuo]
           schema:
             type: string
-            example: "10"
-        
+            example: "0"
+            
       responses:
         '200':
           description: Sucesso
@@ -405,7 +365,7 @@ paths:
                 example: "no-cache"
       security:
         - basicAuth: []
-        
+
   /wdt.htm:
     get:
       tags:
@@ -649,107 +609,53 @@ paths:
       security:
         - basicAuth: []
   
-  /bat.htm:
+  /bateria.htm:
     get:
       tags:
-        - Configuração dos Parametros do Banco de Baterias
-      summary: Configuração dos Parametros do Banco de Baterias
+        - Teste da bateria
+      summary: Configurações do Teste de Bateria
       description: |
-         ## Configura manualmente o acionamento das baterias.
-
+         ## Configura manualmente o acionamento dos testes da baterias.
         
-         ### Sem configuração do Sensor de Temperatura Externo
           **Exemplos**:
-          -  URL: `/bat.htm?batcarga=14.3&batflut=13.7&batsub=10.5&batreturn=12.6&batsobre=16&tempocarga=120&imaxcarga=60&entempex=false&tempfix=false`
-          
-          **Observação**:
-           - **batcarga(+0.5) tem que ser menor que batsobre**
-           - **batflut tem que ser menor ou igual a batcarga**
-           - **batsub tem que ser menor ou igual a batreturn**
-           - **batreturn tem que ser maior ou igual que batsub**
-           - **batsobre tem que ser maior que batcarga**
-           
+          -  URL para desabilitar : `/bateria.htm?trigger=0`
+          - URL para tensão da beteria: `/bateria.htm?trigger=1&bat_minimo=21`
+          - URL do tempo: `/bateria.htm?trigger=2&tempo=60`
+
       parameters:
-        - name: batcarga
+        - name: trigger
           in: query
           description: |
-              Tensão de Carga (por Bateria 12V) [V] - 13V ~ 15V
+              Operação para habilitar os parâmetros: 
+               - `0`- Desabilitado 
+               - `1`- Tensão Bateria
+               - `2`- Tempo
           required: true
           schema:
             type: string
-            example: "14.3"
-            
-        - name: batflut
+            enum:
+              - "0"
+              - "1"
+              - "2"
+            example: "0"
+        - name: bat_minimo
           in: query
           description: |
-             Tensão de Flutuação (por Bateria 12V) [V] - 12,5V ~ 14V
+             Parar teste quando a tensão da bateria for: [V] 
+              O valor pode variar conforme o equipamento. 
         
           schema:
             type: string
-            example: "13.7"
+            example: "21"
             
-        - name: batsub
+        - name: tempo
           in: query
           description: |
-             Desconexão por Sub Tensão (por Bateria 12V) [V] - 10,5V ~ 12V
-          
-          schema:
-            type: string
-            example: "10.5"
-            
-        - name: batreturn
-          in: query
-          description: |
-              Reconexão de Sub Tensão (por Bateria 12V) [V] - 11V ~ 13V
-          
-          schema:
-            type: string
-            example: "12.6"
-              
-        - name: batsobre
-          in: query
-          description: |
-              Desconexão por Sobre Tensão (por Bateria 12V) [V] - 14V ~ 16V
-          
-          schema:
-            type: string
-            example: "16"
-            
-        - name: tempocarga
-          in: query
-          description: |
-              Tempo de Carga [min] - 15Min ~ 180Min
-          
+             Executar o teste durante: [min]
           schema:
             type: string
             example: "60"
-            
-        - name: imaxcarga
-          in: query
-          description: |
-              Corrente Máxima de Carga [A] - 3A ~ 20A - Verificar o modelo do equipamento os valores de corrente podem variar.
-          schema:
-            type: string
-            example: "60"
-
-        - name: entempex
-          in: query
-          description: |
-              Habilitar - configuração do Sensor de Temperatura Externo
-          schema:
-            type: boolean
-            example: true
-            
-        - name: tiposensor
-          in: query
-          description: |
-              Tipo de sensor: 
-              - `0` - Sensor de Temperatura Volt
-              - `1` - Sensor de Temperatura e Umidade Volt
-          schema:
-            type: string
-            example: "0"
-            
+    
       responses:
         '200':
           description: Sucesso
