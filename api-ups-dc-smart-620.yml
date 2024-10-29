@@ -122,8 +122,8 @@ paths:
             Operação para ativar ou desativar as  saídas:
             
               **Tipo de saída**:
-              - `0`: Desligado.
-              - `1`: Ligado.
+              - `0`: NF.
+              - `1`: NA.
           required: true
           schema:
             type: string
