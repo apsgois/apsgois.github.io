@@ -271,7 +271,7 @@ paths:
             enum:
               - "0"
               - "1"
-              - "5"
+              - "2"
             example: "0"
         - name: tmr
           in: query
