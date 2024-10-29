@@ -121,9 +121,10 @@ paths:
           description: |
             Operação para ativar ou desativar as  saídas:
             
+            Obs: Verificar a saída conforme o comando a ser enviado.
               **Tipo de saída**:
-              - `0`: NF.
-              - `1`: NA.
+              - `0`: Desligado/NF.
+              - `1`: Ligado/NA.
           required: true
           schema:
             type: string
