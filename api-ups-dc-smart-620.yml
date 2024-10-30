@@ -398,7 +398,7 @@ paths:
             example: true
         - name: w2
           in: query
-          description: Intervalo entre Varreduras[Min]
+          description: Intervalo entre Varreduras[Min] - Máximo até 60 minutos
           required: true
           schema:
             type: string
