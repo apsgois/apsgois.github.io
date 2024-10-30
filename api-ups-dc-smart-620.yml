@@ -318,14 +318,14 @@ paths:
           description: Acionar relé quando a tensão for menor que [V], valores x10 [24.8 = 248]
           schema:
             type: string
-            example: "24.8"
+            example: "248"
         
         - name: bat_ok
           in: query
           description: Desacionar relé quando tensão for maior que [V], valores x10 [28.0 = 280]
           schema:
             type: string
-            example: "28.0"
+            example: "280"
             
         - name: sensortempo
           in: query
