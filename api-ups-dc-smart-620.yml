@@ -282,7 +282,7 @@ paths:
             example: true
         - name: tmp
           in: query
-          description: Tempo Rearme (segundos)
+          description: Tempo Rearme (segundos) - Mínimo 10 segundos e Máximo 60 segundos
           schema:
             type: string
             example: "10"
@@ -308,6 +308,7 @@ paths:
             enum:
               - "0"
               - "1"
+              - "2"
               - "3"
               - "4"
             example: "0"
